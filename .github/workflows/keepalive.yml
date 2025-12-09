@@ -2,7 +2,7 @@ name: Ping Supabase to Prevent Pausing
 
 on:
   schedule:
-    - cron: "0 */24 * * *"   # runs every 6 hours
+    - cron: "0 */24 * * *"   # runs every 24 hours
   workflow_dispatch:
 
 jobs:
@@ -25,13 +25,19 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LIVIN_LUXE_URL: ${{ secrets.LIVIN_LUXE_URL }}
+          LIVIN_LUXE_KEY: ${{ secrets.LIVIN_LUXE_SERVICE_ROLE_KEY }}
         run: |
           node - << 'EOF'
           const { createClient } = require("@supabase/supabase-js");
           const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+          const livinluxe = createClient(process.env.LIVIN_LUXE_URL, process.env.LIVIN_LUXE_KEY);
 
           async function ping() {
             const { error } = await supabase.rpc("version"); // light query
+            if (error) console.error("Ping error:", error);
+            else console.log("Ping successful");
+            const { error } = await livinluxe.rpc("version"); // light query
             if (error) console.error("Ping error:", error);
             else console.log("Ping successful");
           }
